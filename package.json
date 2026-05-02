@@ -1,0 +1,23 @@
+{
+  "name": "ra2311003040059",
+  "version": "1.0.0",
+  "description": "Campus Hiring Evaluation Project - Node.js Backend",
+  "main": "auth.js",
+  "scripts": {
+    "start": "node auth.js",
+    "auth": "node auth.js",
+    "scheduler": "node vehicle_maintence_scheduler/index.js",
+    "notify": "node notification_app_be/priority.js"
+  },
+  "keywords": [
+    "nodejs",
+    "backend",
+    "campus-hiring"
+  ],
+  "author": "RA2311003040059",
+  "license": "ISC",
+  "dependencies": {
+    "axios": "^1.6.7",
+    "dotenv": "^16.4.5"
+  }
+}
