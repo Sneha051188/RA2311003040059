@@ -18,10 +18,12 @@ const axios = require("axios");
 const fs = require("fs");
 const path = require("path");
 require("dotenv").config();
+const { Log } = require("./logging_middleware/logger");
 
 // ─── Constants ────────────────────────────────────────────────────────────────
 
 const BASE_URL = process.env.BASE_URL || "http://20.207.122.201/evaluation-service";
+const MODULE = "auth";
 const ENV_FILE = path.resolve(__dirname, ".env");
 
 // ─── Helpers ──────────────────────────────────────────────────────────────────
@@ -74,7 +76,7 @@ function persistCredentials(kvPairs) {
  * @returns {Promise<{ clientID: string, clientSecret: string }>}
  */
 async function register() {
-  console.log("[AUTH] Step 1 – Registering user ...");
+  await Log("backend", "info", MODULE, "Step 1 – Registering user ...");
 
   // Read personal details from .env (fill these before running auth.js)
   const email          = process.env.EMAIL;
@@ -98,7 +100,7 @@ async function register() {
   }
 
   // Construct the registration payload exactly as the API expects
-  console.log(`[AUTH] Registering with rollNo=${rollNo}, email=${email}, github=${githubUsername}`);
+  await Log("backend", "info", MODULE, `Registering with rollNo=${rollNo}, email=${email}, github=${githubUsername}`);
 
   const rnd = Math.floor(1000 + Math.random() * 9000).toString();
   const payload = {
@@ -122,7 +124,7 @@ async function register() {
     );
   }
 
-  console.log(`[AUTH] Registered successfully. clientID=${clientID}`);
+  await Log("backend", "info", MODULE, `Registered successfully. clientID=${clientID}`);
   return { clientID, clientSecret, registrationPayload: payload };
 }
 
@@ -136,7 +138,7 @@ async function register() {
  * @returns {Promise<string>} - The access_token string
  */
 async function authenticate(clientID, clientSecret, registrationPayload) {
-  console.log("[AUTH] Step 2 – Fetching access token ...");
+  await Log("backend", "info", MODULE, "Step 2 – Fetching access token ...");
 
   const payload = {
     email: registrationPayload.email,
@@ -159,7 +161,7 @@ async function authenticate(clientID, clientSecret, registrationPayload) {
     );
   }
 
-  console.log("[AUTH] Access token obtained successfully.");
+  await Log("backend", "info", MODULE, "Access token obtained successfully.");
   return access_token;
 }
 
@@ -185,18 +187,18 @@ async function main() {
       BASE_URL: BASE_URL,
     });
 
-    console.log("\n[AUTH] ✅  All credentials saved to .env");
-    console.log(`  CLIENT_ID     = ${clientID}`);
-    console.log(`  CLIENT_SECRET = ${clientSecret}`);
-    console.log(`  ACCESS_TOKEN  = ${access_token.slice(0, 20)}…`);
-    console.log(`  BASE_URL      = ${BASE_URL}`);
+    await Log("backend", "info", MODULE, "\n✅ All credentials saved to .env\n" +
+      `  CLIENT_ID     = ${clientID}\n` +
+      `  CLIENT_SECRET = ${clientSecret.substring(0, 4)}...${clientSecret.substring(clientSecret.length - 4)}\n` +
+      `  ACCESS_TOKEN  = ${access_token.substring(0, 20)}...\n` +
+      `  BASE_URL      = ${BASE_URL}\n`);
 
     return { clientID, clientSecret, access_token };
   } catch (error) {
-    const message = error.response
+    const reason = error.response
       ? `HTTP ${error.response.status} – ${JSON.stringify(error.response.data)}`
       : error.message;
-    console.error(`[AUTH] ❌  Authentication failed: ${message}`);
+    await Log("backend", "error", MODULE, `❌ Authentication failed: ${reason}`);
     process.exit(1);
   }
 }

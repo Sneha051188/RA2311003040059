@@ -194,22 +194,22 @@ async function reportResults(vehicles, selectedIndices, maxImpact, capacity) {
     `Solved: Impact=${maxImpact} Hrs=${totalDuration}/${capacity}`
   );
 
-  console.log("\n══════════════════════════════════════════════════");
-  console.log("  VEHICLE MAINTENANCE SCHEDULER – OPTIMAL PLAN");
-  console.log("══════════════════════════════════════════════════");
-  console.log(`  Available Mechanic Hours : ${capacity}`);
-  console.log(`  Vehicles Scheduled       : ${selected.length}`);
-  console.log(`  Total Duration Used      : ${totalDuration} hrs`);
-  console.log(`  Total Impact Achieved    : ${maxImpact}`);
-  console.log("──────────────────────────────────────────────────");
+  let output = "\n══════════════════════════════════════════════════\n";
+  output += "  VEHICLE MAINTENANCE SCHEDULER – OPTIMAL PLAN\n";
+  output += "══════════════════════════════════════════════════\n";
+  output += `  Available Mechanic Hours : ${capacity}\n`;
+  output += `  Vehicles Scheduled       : ${selected.length}\n`;
+  output += `  Total Duration Used      : ${totalDuration} hrs\n`;
+  output += `  Total Impact Achieved    : ${maxImpact}\n`;
+  output += "──────────────────────────────────────────────────\n";
 
   selected.forEach((v, rank) => {
-    console.log(
-      `  [${rank + 1}] ${v.name.padEnd(20)} | Duration: ${String(v.duration).padStart(3)} hrs | Impact: ${v.impact}`
-    );
+    output += `  [${rank + 1}] ${v.name.padEnd(20)} | Duration: ${String(v.duration).padStart(3)} hrs | Impact: ${v.impact}\n`;
   });
 
-  console.log("══════════════════════════════════════════════════\n");
+  output += "══════════════════════════════════════════════════\n";
+  
+  await Log("backend", "info", MODULE, output);
 
   // Log the full selected set as a structured entry
   await Log(
@@ -265,7 +265,7 @@ async function main() {
       : error.message;
 
     await Log("backend", "error", MODULE, `Scheduler failed: ${reason}`);
-    console.error(`[ERROR] ${reason}`);
+    await Log("backend", "error", MODULE, `[ERROR] ${reason}`);
     process.exit(1);
   }
 }

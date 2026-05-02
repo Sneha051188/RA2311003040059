@@ -41,9 +41,6 @@ async function Log(stack, level, pkg, message) {
 
   const token = process.env.ACCESS_TOKEN;
   if (!token) {
-    console.warn(
-      "[LOGGER] ACCESS_TOKEN is not set. Remote log skipped. Run auth.js first."
-    );
     return;
   }
 
@@ -51,7 +48,7 @@ async function Log(stack, level, pkg, message) {
     stack,
     level,
     package: pkg,
-    message,
+    message: message.length > 48 ? message.substring(0, 45) + "..." : message,
   };
 
   try {
@@ -63,10 +60,7 @@ async function Log(stack, level, pkg, message) {
       timeout: 5000,
     });
   } catch (error) {
-    const reason = error.response
-      ? `HTTP ${error.response.status} – ${JSON.stringify(error.response.data)}`
-      : error.message;
-    console.warn(`[LOGGER] ⚠️  Failed to send remote log: ${reason}`);
+    // Silently fail if remote logging server is down or token is invalid
   }
 }
 

@@ -170,22 +170,22 @@ function rankNotifications(notifications, topN = 10) {
  * @param {Array} topNotifications
  */
 async function displayResults(topNotifications) {
-  console.log("\n══════════════════════════════════════════════════════════");
-  console.log("  TOP 10 NOTIFICATIONS BY PRIORITY");
-  console.log("══════════════════════════════════════════════════════════");
-  console.log(
-    `  ${"Rank".padEnd(5)} ${"Type".padEnd(12)} ${"Score".padEnd(14)} ${"Message"}`
-  );
-  console.log("──────────────────────────────────────────────────────────");
+  let output = "\n══════════════════════════════════════════════════════════\n";
+  output += "  TOP 10 NOTIFICATIONS BY PRIORITY\n";
+  output += "══════════════════════════════════════════════════════════\n";
+  output += "  Rank  Type         Score          Message\n";
+  output += "──────────────────────────────────────────────────────────\n";
 
   topNotifications.forEach((n, idx) => {
-    const type = (n.type || n.notificationType || "Unknown").padEnd(12);
-    const score = String(n.priorityScore).padEnd(14);
-    const message = n.message || n.title || n.body || "(no message)";
-    console.log(`  ${String(idx + 1).padEnd(5)} ${type} ${score} ${message}`);
+    const rank = String(idx + 1).padEnd(4);
+    const type = n.type.padEnd(12);
+    const score = String(Math.round(n.priorityScore)).padEnd(14);
+    const msg = n.message.length > 30 ? n.message.substring(0, 27) + "..." : n.message;
+    output += `  ${rank}  ${type} ${score} ${msg}\n`;
   });
 
-  console.log("══════════════════════════════════════════════════════════\n");
+  output += "══════════════════════════════════════════════════════════\n";
+  await Log("backend", "info", MODULE, output);
 
   await Log(
     "backend",
@@ -232,7 +232,7 @@ async function main() {
       : error.message;
 
     await Log("backend", "error", MODULE, `Priority system failed: ${reason}`);
-    console.error(`[ERROR] ${reason}`);
+    await Log("backend", "error", MODULE, `[ERROR] ${reason}`);
     process.exit(1);
   }
 }
